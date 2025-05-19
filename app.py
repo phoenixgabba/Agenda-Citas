@@ -134,4 +134,3 @@ def asegurar_archivos():
                 json.dump([], f, indent=4, ensure_ascii=False)
 
 
-if __name__ == "__main__":
