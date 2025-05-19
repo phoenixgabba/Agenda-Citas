@@ -15,6 +15,7 @@ body {
 }
 
 h1, h2 {
+    font-family: "Palatino Linotype", "Old English Text MT", "Lucida Blackletter", serif;
     color: #f1c40f; /* Dorado */
 }
 
@@ -93,3 +94,4 @@ li {
 .flash-message.danger {
     background-color: #e74c3c;
 }
+
