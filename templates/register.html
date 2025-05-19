@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Registrar nuevo usuario</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap" rel="stylesheet" />
     <style>
         body {
             background-color: #000;
@@ -13,6 +13,13 @@
             text-align: center;
             padding: 50px;
             font-size: 1.2em;
+        }
+        .titulo-gotico {
+            font-family: "Old English Text MT", "Palatino Linotype", "Lucida Blackletter", serif;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
         }
         form {
             display: inline-block;
@@ -79,29 +86,8 @@
 </head>
 <body>
 
-    <h1>📝 Registrar nuevo usuario</h1>
+    <h1 class="titulo-gotico">📝 Registrar nuevo usuario</h1>
 
     <form action="/register" method="POST">
         <div class="form-group">
             <label for="usuario">Usuario:</label>
-            <input type="text" id="usuario" name="usuario" required>
-        </div>
-        <div class="form-group">
-            <label for="contrasena">Contraseña:</label>
-            <input type="password" id="contrasena" name="contrasena" required>
-        </div>
-        <button type="submit">Registrar</button>
-    </form>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash-message {{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
-
-</body>
-</html>
