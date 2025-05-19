@@ -132,6 +132,3 @@ def asegurar_archivos():
         if not os.path.exists(archivo):
             with open(archivo, 'w', encoding='utf-8') as f:
                 json.dump([], f, indent=4, ensure_ascii=False)
-
-
-if __name__ == "__main__":
