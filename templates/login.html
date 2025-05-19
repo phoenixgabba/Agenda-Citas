@@ -14,6 +14,13 @@
             padding: 50px;
             font-size: 1.2em;
         }
+        .titulo-gotico {
+            font-family: "Old English Text MT", "Palatino Linotype", "Lucida Blackletter", serif;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
         form {
             display: inline-block;
             background-color: #111;
@@ -79,7 +86,7 @@
 </head>
 <body>
 
-    <h1>🔐 Iniciar sesión</h1>
+    <h1 class="titulo-gotico">🔐 Iniciar sesión</h1>
 
     <form action="/login" method="POST">
         <div class="form-group">
@@ -96,12 +103,4 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <p class="flash-message {{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <a href="/register">¿No tienes cuenta? Regístrate</a>
-
-</body>
-</html>
+                <p class
