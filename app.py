@@ -3,29 +3,37 @@ import json
 import os
 
 app = Flask(__name__)
-app.secret_key = "tu_clave_secreta"
+app.secret_key = "tu_clave_secreta"  # Asegúrate de cambiar esta clave en producción
 
 CITAS_FILE = "citas.json"
 CLIENTES_FILE = "clientes.json"
 USUARIOS_FILE = "usuarios.json"
 
+# Asegurarse de que los archivos JSON existen
 def asegurar_archivos():
     for file in [CITAS_FILE, CLIENTES_FILE, USUARIOS_FILE]:
         if not os.path.exists(file):
             with open(file, "w", encoding="utf-8") as f:
-                f.write("[]")
+                f.write("[]")  # Escribir un arreglo vacío en los archivos JSON
 
+# Cargar datos desde un archivo JSON
 def cargar_json(file):
-    with open(file, "r", encoding="utf-8") as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return []
+    if not os.path.exists(file):
+        return []  # Retorna una lista vacía si el archivo no existe
 
+    try:
+        with open(file, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError) as e:
+        flash(f"Error al leer el archivo {file}: {str(e)}", "error")
+        return []
+
+# Guardar datos en un archivo JSON
 def guardar_json(file, data):
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+# Función para convertir a float de forma segura
 def to_float_safe(value):
     try:
         if value is None or value == "":
@@ -34,6 +42,7 @@ def to_float_safe(value):
     except (ValueError, TypeError):
         return 0.0
 
+# Actualizar cliente con nuevo tatuaje y comentario
 def actualizar_cliente(nombre_cliente, tatuaje, comentario):
     clientes = cargar_json(CLIENTES_FILE)
     cliente = next((c for c in clientes if c["nombre"].lower() == nombre_cliente.lower()), None)
@@ -53,9 +62,11 @@ def actualizar_cliente(nombre_cliente, tatuaje, comentario):
 
     guardar_json(CLIENTES_FILE, clientes)
 
+# Obtener usuario actual
 def usuario_actual():
     return session.get("usuario")
 
+# Verificar si el usuario está autenticado
 def login_requerido():
     if "usuario" not in session:
         flash("Debes iniciar sesión para acceder", "warning")
@@ -66,17 +77,21 @@ def index():
     asegurar_archivos()
     if "usuario" not in session:
         return redirect("/login")
+    
     citas = cargar_json(CITAS_FILE)
     usuario = session["usuario"]
     citas_usuario = [c for c in citas if c.get("usuario") == usuario]
-    citas_usuario.sort(key=lambda x: (x["fecha"], x["hora"]))
+    citas_usuario.sort(key=lambda x: (x["fecha"], x["hora"]))  # Ordenar por fecha y hora
+
     return render_template("index.html", citas=citas_usuario)
 
 @app.route("/nueva", methods=["GET", "POST"])
 def nueva():
     if not usuario_actual():
         return redirect("/login")
+    
     asegurar_archivos()
+    
     if request.method == "POST":
         nueva_cita = {
             "fecha": request.form.get("fecha"),
@@ -97,12 +112,14 @@ def nueva():
 
         flash("Cita añadida correctamente", "success")
         return redirect("/")
+    
     return render_template("nueva_cita.html")
 
 @app.route("/editar/<int:index>", methods=["GET", "POST"])
 def editar(index):
     if not usuario_actual():
         return redirect("/login")
+    
     asegurar_archivos()
     citas = cargar_json(CITAS_FILE)
     citas_usuario = [c for c in citas if c.get("usuario") == usuario_actual()]
@@ -136,6 +153,7 @@ def editar(index):
 def eliminar(index):
     if not usuario_actual():
         return redirect("/login")
+    
     asegurar_archivos()
     citas = cargar_json(CITAS_FILE)
     citas_usuario = [c for c in citas if c.get("usuario") == usuario_actual()]
@@ -147,6 +165,7 @@ def eliminar(index):
         flash(f"Cita de {cita['cliente']} eliminada correctamente", "success")
     else:
         flash("Índice de cita no válido", "error")
+    
     return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -155,6 +174,7 @@ def register():
     if request.method == "POST":
         usuario = request.form.get("usuario")
         password = request.form.get("password")
+        
         if not usuario or not password:
             flash("Completa todos los campos", "error")
             return redirect("/register")
@@ -168,6 +188,7 @@ def register():
         guardar_json(USUARIOS_FILE, usuarios)
         flash("Registro exitoso, ahora inicia sesión", "success")
         return redirect("/login")
+    
     return render_template("register.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -187,6 +208,7 @@ def login():
         else:
             flash("Credenciales inválidas", "error")
             return redirect("/login")
+    
     return render_template("login.html")
 
 @app.route("/logout")
@@ -198,5 +220,3 @@ def logout():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
-
-
