@@ -131,4 +131,5 @@ def asegurar_archivos():
     for archivo in [USUARIOS_FILE, CITAS_FILE]:
         if not os.path.exists(archivo):
             with open(archivo, 'w', encoding='utf-8') as f:
-                json.dump([], f, indent=4, ensure_ascii=False
+                json.dump([], f, indent=4, ensure_ascii=False)
+                
