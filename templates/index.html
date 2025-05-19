@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestor de Citas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #FFD700;
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            padding: 30px;
+            font-size: 1.3em;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 90%;
+            max-width: 900px;
+        }
+        th, td {
+            border: 1px solid #FFD700;
+            padding: 10px 15px;
+        }
+        th {
+            background-color: #222;
+        }
+        td {
+            background-color: #111;
+        }
+        a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 15px;
+            display: inline-block;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .flash-success {
+            color: #0f0;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .flash-error {
+            color: #f33;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .no-citas {
+            margin-top: 50px;
+            font-style: italic;
+        }
+        button.eliminar-btn {
+            background: none;
+            border: none;
+            color: #FFD700;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            padding: 0;
+        }
+        button.eliminar-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, message in messages %}
+            <p class="flash-{{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h1>📅 Lista de Citas</h1>
+    <a href="/nueva">➕ Añadir nueva cita</a>
+
+    {% if citas|length == 0 %}
+        <p class="no-citas">No hay citas programadas.</p>
+    {% else %}
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Tatuaje</th>
+                <th>Precio (€)</th>
+                <th>Señal (€)</th>
+                <th>Comentarios</th>
+                <th>Editar</th>
+                <th>Eliminar</th> <!-- Nueva columna para eliminar -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita.fecha }}</td>
+                <td>{{ cita.hora }}</td>
+                <td>{{ cita.cliente }}</td>
+                <td>{{ cita.tatuaje }}</td>
+                <td>{{ "%.2f"|format(cita.precio) }}</td>
+                <td>{{ "%.2f"|format(cita.senal if cita.senal is defined else 0) }}</td>
+                <td>{{ cita.comentarios|default('') }}</td>
+                <td><a href="/editar/{{ loop.index0 }}">✏️ Editar</a></td>
+                <td>
+                     <form action="/eliminar/{{ loop.index0 }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar esta cita?');">
+                        <button type="submit" class="eliminar-btn">🗑️ Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</body>
+</html>
+
+

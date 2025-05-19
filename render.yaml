@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: gestor-tatuajes
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: "app.py"
