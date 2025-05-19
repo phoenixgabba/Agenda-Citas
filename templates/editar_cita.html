@@ -70,45 +70,36 @@
     </style>
 </head>
 <body>
-    {% if session['user'] %}
-        {% if cita.user == session['user'] %}
-            <h1>✏️ Editar cita</h1>
-            <form method="POST">
-                <label for="fecha">Fecha:</label>
-                <input type="date" name="fecha" id="fecha" value="{{ cita.fecha }}" required>
+    <h1>✏️ Editar cita</h1>
+    <form method="POST">
+        <label for="fecha">Fecha:</label>
+        <input type="date" name="fecha" id="fecha" value="{{ cita.fecha }}" required>
 
-                <label for="hora">Hora:</label>
-                <input type="time" name="hora" id="hora" value="{{ cita.hora }}" required>
+        <label for="hora">Hora:</label>
+        <input type="time" name="hora" id="hora" value="{{ cita.hora }}" required>
 
-                <label for="cliente">Cliente:</label>
-                <input type="text" name="cliente" id="cliente" value="{{ cita.cliente }}" required placeholder="Nombre del cliente" autocomplete="off" autofocus>
+        <label for="cliente">Cliente:</label>
+        <input type="text" name="cliente" id="cliente" value="{{ cita.cliente }}" required placeholder="Nombre del cliente" autocomplete="off" autofocus>
 
-                <label for="tatuaje">Tatuaje:</label>
-                <input type="text" name="tatuaje" id="tatuaje" value="{{ cita.tatuaje }}" required placeholder="Descripción del tatuaje" autocomplete="off">
+        <label for="tatuaje">Tatuaje:</label>
+        <input type="text" name="tatuaje" id="tatuaje" value="{{ cita.tatuaje }}" required placeholder="Descripción del tatuaje" autocomplete="off">
 
-                <label for="precio">Precio (€):</label>
-                <input type="number" step="0.01" min="0" name="precio" id="precio" value="{{ cita.precio }}" required placeholder="Precio total">
+        <label for="precio">Precio (€):</label>
+        <input type="number" step="0.01" min="0" name="precio" id="precio" value="{{ cita.precio }}" required placeholder="Precio total">
 
-                <label for="senal">Señal (€):</label>
-                <input type="number" step="0.01" min="0" name="senal" id="senal" value="{{ cita.senal if cita.senal is defined else 0 }}" placeholder="Cantidad entregada">
+        <label for="senal">Señal (€):</label>
+        <input type="number" step="0.01" min="0" name="senal" id="senal" value="{{ cita.senal if cita.senal is defined else 0 }}" placeholder="Cantidad entregada">
 
-                <label for="comentarios">Comentarios:</label>
-                <textarea name="comentarios" id="comentarios" rows="4" placeholder="Comentarios adicionales...">{{ cita.comentarios|default('') }}</textarea>
+        <label for="comentarios">Comentarios:</label>
+        <textarea name="comentarios" id="comentarios" rows="4" placeholder="Comentarios adicionales...">{{ cita.comentarios|default('') }}</textarea>
 
-                <button type="submit">Actualizar</button>
-            </form>
+        <button type="submit">Actualizar</button>
+    </form>
 
-            <form method="POST" action="{{ url_for('eliminar', index=index) }}">
-                <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro de que quieres eliminar esta cita?');">🗑️ Eliminar cita</button>
-            </form>
-        {% else %}
-            <h1>No tienes permisos para editar esta cita</h1>
-            <p>Solo puedes editar las citas que has creado.</p>
-        {% endif %}
-    {% else %}
-        <h1>No estás autenticado</h1>
-        <p>Por favor, <a href="/login">inicia sesión</a> para editar la cita.</p>
-    {% endif %}
+    <form method="POST" action="{{ url_for('eliminar', index=index) }}">
+        <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro de que quieres eliminar esta cita?');">🗑️ Eliminar cita</button>
+    </form>
+
     <a href="/">⬅️ Volver a las citas</a>
 </body>
 </html>
