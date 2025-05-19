@@ -66,31 +66,31 @@
     </style>
 </head>
 <body>
-    <h1>➕ Añadir nueva cita</h1>
-    <form method="POST">
-        <label for="fecha">Fecha:</label>
-        <input type="date" name="fecha" id="fecha" required>
+    {% if session['user'] %}
+        <h1>➕ Añadir nueva cita</h1>
+        <form method="POST">
+            <label for="fecha">Fecha:</label>
+            <input type="date" name="fecha" id="fecha" required>
 
-        <label for="hora">Hora:</label>
-        <input type="time" name="hora" id="hora" required>
+            <label for="hora">Hora:</label>
+            <input type="time" name="hora" id="hora" required>
 
-        <label for="cliente">Cliente:</label>
-        <input type="text" name="cliente" id="cliente" required placeholder="Nombre del cliente" autocomplete="off" autofocus>
+            <label for="cliente">Cliente:</label>
+            <input type="text" name="cliente" id="cliente" required placeholder="Nombre del cliente" autocomplete="off" autofocus>
 
-        <label for="tatuaje">Tatuaje:</label>
-        <input type="text" name="tatuaje" id="tatuaje" required placeholder="Descripción del tatuaje" autocomplete="off">
+            <label for="tatuaje">Tatuaje:</label>
+            <input type="text" name="tatuaje" id="tatuaje" required placeholder="Descripción del tatuaje" autocomplete="off">
 
-        <label for="precio">Precio (€):</label>
-        <input type="number" step="0.01" min="0" name="precio" id="precio" required placeholder="Precio total">
+            <label for="precio">Precio (€):</label>
+            <input type="number" step="0.01" min="0" name="precio" id="precio" required placeholder="Precio total">
 
-        <label for="senal">Señal (€):</label>
-        <input type="number" step="0.01" min="0" name="senal" id="senal" value="0" placeholder="Cantidad entregada">
+            <label for="senal">Señal (€):</label>
+            <input type="number" step="0.01" min="0" name="senal" id="senal" value="0" placeholder="Cantidad entregada">
 
-        <label for="comentarios">Comentarios:</label>
-        <textarea name="comentarios" id="comentarios" rows="4" placeholder="Comentarios adicionales..."></textarea>
+            <label for="comentarios">Comentarios:</label>
+            <textarea name="comentarios" id="comentarios" rows="4" placeholder="Comentarios adicionales..."></textarea>
 
-        <button type="submit">Guardar</button>
-    </form>
-    <a href="/">⬅️ Volver a las citas</a>
-</body>
-</html>
+            <button type="submit">Guardar</button>
+        </form>
+    {% else %}
+        <h1>No estás autentic
