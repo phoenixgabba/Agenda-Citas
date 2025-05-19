@@ -15,8 +15,15 @@ body {
 }
 
 h1, h2 {
-    font-family: "Palatino Linotype", "Old English Text MT", "Lucida Blackletter", serif;
     color: #f1c40f; /* Dorado */
+}
+
+/* Solo el título de login en letra gótica elegante */
+.titulo-login {
+    font-family: "Palatino Linotype", "Old English Text MT", "Lucida Blackletter", serif;
+    font-weight: bold;
+    font-size: 28px;
+    margin-bottom: 20px;
 }
 
 a {
@@ -94,4 +101,3 @@ li {
 .flash-message.danger {
     background-color: #e74c3c;
 }
-
