@@ -1,0 +1,95 @@
+/* estilos.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #f1c40f; /* Dorado */
+    text-align: center;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #f1c40f; /* Dorado */
+}
+
+a {
+    color: #f1c40f;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #fff;
+    background-color: #f1c40f;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+form {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    width: 300px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+input[type="text"], input[type="password"], input[type="date"], input[type="time"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #444;
+    border: 1px solid #f1c40f;
+    border-radius: 5px;
+    color: #fff;
+}
+
+button {
+    background-color: #f1c40f;
+    color: #111;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e67e22;
+}
+
+ul {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+li {
+    background-color: #222;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.flash-message {
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.flash-message.success {
+    background-color: #2ecc71;
+}
+
+.flash-message.danger {
+    background-color: #e74c3c;
+}

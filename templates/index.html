@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Citas</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
     <style>
@@ -49,6 +50,16 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
+        .flash-warning {
+            color: #ffa500;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .flash-info {
+            color: #00f;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
         h1 {
             margin-bottom: 20px;
             font-size: 2.5em;
@@ -69,9 +80,25 @@
         button.eliminar-btn:hover {
             text-decoration: underline;
         }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto 30px;
+            padding: 0 10px;
+        }
+        .top-bar span {
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
+
+    <div class="top-bar">
+        <span>Usuario: {{ session.usuario }}</span>
+        <a href="/logout">🚪 Cerrar sesión</a>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -100,7 +127,7 @@
                 <th>Señal (€)</th>
                 <th>Comentarios</th>
                 <th>Editar</th>
-                <th>Eliminar</th> <!-- Nueva columna para eliminar -->
+                <th>Eliminar</th>
             </tr>
         </thead>
         <tbody>
@@ -115,7 +142,7 @@
                 <td>{{ cita.comentarios|default('') }}</td>
                 <td><a href="/editar/{{ loop.index0 }}">✏️ Editar</a></td>
                 <td>
-                     <form action="/eliminar/{{ loop.index0 }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar esta cita?');">
+                    <form action="/eliminar/{{ loop.index0 }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar esta cita?');">
                         <button type="submit" class="eliminar-btn">🗑️ Eliminar</button>
                     </form>
                 </td>
@@ -127,5 +154,3 @@
 
 </body>
 </html>
-
-
