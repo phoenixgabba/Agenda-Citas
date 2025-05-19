@@ -136,7 +136,3 @@ def asegurar_archivos():
 
 if __name__ == "__main__":
     app.run(debug=True)
-<<<<<<< HEAD
-=======
-
->>>>>>> f82c1691630c853426a7b6d8d58ed16e1e1bfd98
