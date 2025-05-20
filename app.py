@@ -1,206 +1,127 @@
-from flask import Flask, render_template, request, redirect, session, flash
-import json
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_wtf import FlaskForm
+from wtforms import StringField, FileField, TextAreaField, SelectMultipleField
+from wtforms.validators import DataRequired
+from werkzeug.utils import secure_filename
+import sqlite3
 import os
 
 app = Flask(__name__)
-app.secret_key = 'TU_CLAVE_SECRETA_AQUI'  # Cambia esto por una clave segura y secreta
+app.secret_key = 'supersecretkey'
 
-USUARIOS_FILE = 'usuarios.json'
-CITAS_FILE = 'citas.json'
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# ---------- BASE DE DATOS ----------
+def get_db():
+    conn = sqlite3.connect('tattoo_forms.db')
+    return conn
 
-# Función para obtener el usuario actual desde la sesión
-def usuario_actual():
-    return session.get("usuario")
+# Crear tabla si no existe
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(''' 
+        CREATE TABLE IF NOT EXISTS formularios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            sitio TEXT,
+            tamanio TEXT,
+            disponibilidad TEXT,
+            referencias_texto TEXT,
+            fotos TEXT,
+            forma_contacto TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
+init_db()
 
-# Función para cargar datos desde un archivo JSON de forma segura
-def cargar_json(file):
-    try:
-        with open(file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            if isinstance(data, list) and len(data) == 1 and isinstance(data[0], list):
-                data = data[0]
-            return data
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+# ---------- FORMULARIO ----------
+class FormularioTattoo(FlaskForm):
+    nombre = StringField('Nombre y Apellidos', validators=[DataRequired()])
+    sitio = StringField('Zona del cuerpo', validators=[DataRequired()])
+    foto = FileField('Imagen de referencia', render_kw={"multiple": True})
+    tamanio = StringField('Tamaño (cm)', validators=[DataRequired()])
+    referencias_texto = TextAreaField('Ideas, referencias y estilo', validators=[DataRequired()])
+    disponibilidad = SelectMultipleField('Días preferentes', choices=[
+        ('Lunes', 'Lunes'), ('Martes', 'Martes'), ('Miércoles', 'Miércoles'),
+        ('Jueves', 'Jueves'), ('Viernes', 'Viernes'), ('Sábado', 'Sábado')],
+        validators=[DataRequired()])
+    disponibilidad_horaria = SelectMultipleField('Disponibilidad horaria', choices=[
+        ('Mañanas', 'Mañanas'), ('Tardes', 'Tardes')],
+        validators=[DataRequired()])
+    
+    # Campo para forma de contacto
+    forma_contacto = StringField('Forma de contacto (correo o teléfono)', validators=[DataRequired()])
 
-
-# Crear los archivos necesarios si no existen
-def asegurar_archivos():
-    for archivo in [USUARIOS_FILE, CITAS_FILE]:
-        if not os.path.exists(archivo):
-            with open(archivo, 'w', encoding='utf-8') as f:
-                json.dump([], f, indent=4, ensure_ascii=False)
-
-
-# Página de login
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        usuario = request.form.get("usuario")
-        contrasena = request.form.get("contrasena")
-
-        usuarios = cargar_json(USUARIOS_FILE)
-        user = next((u for u in usuarios if u.get("usuario") == usuario and u.get("contrasena") == contrasena), None)
-
-        if user:
-            session["usuario"] = usuario
-            flash("Sesión iniciada", "success")
-            return redirect("/")
-        else:
-            flash("Credenciales incorrectas", "danger")
-
-    return render_template("login.html")
-
-
-# Página de registro
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        usuario = request.form.get("usuario")
-        contrasena = request.form.get("contrasena")
-        usuarios = cargar_json(USUARIOS_FILE)
-
-        if any(u.get("usuario") == usuario for u in usuarios):
-            flash("El usuario ya existe", "danger")
-            return redirect("/register")
-
-        usuarios.append({"usuario": usuario, "contrasena": contrasena})
-        with open(USUARIOS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(usuarios, f, indent=4, ensure_ascii=False)
-
-        flash("Usuario registrado con éxito", "success")
-        return redirect("/login")
-
-    return render_template("register.html")
-
-
-# Página de inicio (panel de citas)
-@app.route("/")
+# ---------- RUTAS ----------
+@app.route('/')
 def index():
-    asegurar_archivos()
-    if "usuario" not in session:
-        return redirect("/login")
+    app.logger.info("Accediendo a la página de inicio")
+    return redirect(url_for('formulario'))
 
-    citas = cargar_json(CITAS_FILE)
-    usuario = session["usuario"]
-    citas_usuario = [c for c in citas if c.get("usuario") == usuario]
-    citas_usuario.sort(key=lambda x: (x.get("fecha", ""), x.get("hora", "")))
+@app.route('/formulario', methods=['GET', 'POST'])
+def formulario():
+    form = FormularioTattoo()
+    if form.validate_on_submit():
+        nombre = form.nombre.data
+        sitio = form.sitio.data
+        tamanio = form.tamanio.data
+        disponibilidad = ', '.join(form.disponibilidad.data)  # Almacenamos los días seleccionados
+        disponibilidad_horaria = ', '.join(form.disponibilidad_horaria.data)  # Almacenamos los horarios seleccionados
+        referencias_texto = form.referencias_texto.data
+        forma_contacto = form.forma_contacto.data
 
-    return render_template("index.html", citas=citas_usuario)
+        # Guardar archivos
+        fotos = form.foto.data
+        filenames = []
+        if fotos:
+            for foto in fotos:
+                filename = secure_filename(foto.filename)
+                foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                filenames.append(filename)
 
+        conn = get_db()
+        c = conn.cursor()
+        c.execute(""" 
+            INSERT INTO formularios (nombre, sitio, tamanio, disponibilidad, referencias_texto, fotos, forma_contacto)
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (nombre, sitio, tamanio, disponibilidad, referencias_texto, ','.join(filenames), forma_contacto))  # Guardamos los datos
+        conn.commit()
+        conn.close()
 
-# Página para agregar una nueva cita
-@app.route("/nueva", methods=["GET", "POST"])
-def nueva_cita():
-    if "usuario" not in session:
-        return redirect("/login")
+        return redirect(url_for('formulario'))
 
-    if request.method == "POST":
-        usuario = session["usuario"]
-        fecha = request.form.get("fecha")
-        hora = request.form.get("hora")
-        cliente = request.form.get("cliente")
-        tatuaje = request.form.get("tatuaje")
-        precio = float(request.form.get("precio", 0))
-        senal = float(request.form.get("senal", 0))
-        comentarios = request.form.get("comentarios", "")
+    return render_template('formulario.html', form=form)
 
-        citas = cargar_json(CITAS_FILE)
-        nueva = {
-            "usuario": usuario,
-            "fecha": fecha,
-            "hora": hora,
-            "cliente": cliente,
-            "tatuaje": tatuaje,
-            "precio": precio,
-            "senal": senal,
-            "comentarios": comentarios
-        }
-        citas.append(nueva)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username'] == 'admin' and request.form['password'] == '12345':
+            session['logged_in'] = True
+            return redirect(url_for('admin'))
+        else:
+            return 'Credenciales incorrectas'
+    return render_template('login.html')
 
-        with open(CITAS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(citas, f, indent=4, ensure_ascii=False)
+@app.route('/admin')
+def admin():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM formularios")
+    formularios = c.fetchall()
+    conn.close()
+    return render_template('admin.html', formularios=formularios)
 
-        flash("Cita añadida con éxito", "success")
-        return redirect("/")
-
-    return render_template("nueva_cita.html")
-
-
-# Página para editar cita existente
-@app.route("/editar/<int:index>", methods=["GET", "POST"])
-def editar(index):
-    if "usuario" not in session:
-        return redirect("/login")
-
-    usuario = session["usuario"]
-    citas = cargar_json(CITAS_FILE)
-    citas_usuario = [c for c in citas if c.get("usuario") == usuario]
-
-    if index < 0 or index >= len(citas_usuario):
-        flash("Cita no encontrada", "danger")
-        return redirect("/")
-
-    cita = citas_usuario[index]
-
-    if request.method == "POST":
-        cita["fecha"] = request.form.get("fecha")
-        cita["hora"] = request.form.get("hora")
-        cita["cliente"] = request.form.get("cliente")
-        cita["tatuaje"] = request.form.get("tatuaje")
-        cita["precio"] = float(request.form.get("precio", 0))
-        cita["senal"] = float(request.form.get("senal", 0))
-        cita["comentarios"] = request.form.get("comentarios", "")
-
-        # Actualizar cita en la lista global
-        for i, c in enumerate(citas):
-            if c == citas_usuario[index]:
-                citas[i] = cita
-                break
-
-        with open(CITAS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(citas, f, indent=4, ensure_ascii=False)
-
-        flash("Cita actualizada", "success")
-        return redirect("/")
-
-    return render_template("editar_cita.html", cita=cita, index=index)
-
-
-# Ruta para eliminar cita
-@app.route("/eliminar/<int:index>", methods=["POST"])
-def eliminar(index):
-    if "usuario" not in session:
-        return redirect("/login")
-
-    usuario = session["usuario"]
-    citas = cargar_json(CITAS_FILE)
-    citas_usuario = [c for c in citas if c.get("usuario") == usuario]
-
-    if index < 0 or index >= len(citas_usuario):
-        flash("Cita no encontrada", "danger")
-        return redirect("/")
-
-    cita_a_eliminar = citas_usuario[index]
-    citas = [c for c in citas if c != cita_a_eliminar]
-
-    with open(CITAS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(citas, f, indent=4, ensure_ascii=False)
-
-    flash("Cita eliminada", "success")
-    return redirect("/")
-
-
-# Cerrar sesión
-@app.route("/logout")
+@app.route('/logout')
 def logout():
-    session.pop("usuario", None)
-    flash("Sesión cerrada", "success")
-    return redirect("/login")
+    session.clear()
+    return redirect(url_for('login'))
 
-
-if __name__ == "__main__":
-    asegurar_archivos()
+if __name__ == '__main__':
     app.run(debug=True)
